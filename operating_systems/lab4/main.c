@@ -4,7 +4,7 @@
 #include <signal.h>
 #include <stdlib.h>
 
-#define N 5
+#define N 50
 #define LEFT(i) (i - 1 + N) % N
 #define RIGHT(i) (i + 1) % N
 enum STATE_TYPES
@@ -17,14 +17,16 @@ enum STATE_TYPES
 pthread_mutex_t state_lock;
 enum STATE_TYPES state[N];
 sem_t philosopher_lock[N];
+pthread_t philosopher_thread[N];
 
 void catch_int(int sig_num)
 {
    int i;
-   pthread_mutex_destroy(&state_lock);
+//   for (i = 0; i < N; i++)
+//      pthread_cancel(philosopher_thread[i]);
    for (i = 0; i < N; i++)
       sem_destroy(&philosopher_lock[i]);
-   
+   pthread_mutex_destroy(&state_lock);
    exit(0);
 }
 
@@ -85,8 +87,7 @@ int main()
 
    for (i = 0; i< N; i++)
    {
-      pthread_t thrd;
-      pthread_create(&thrd, 0, philosopher, (void*)i);
+      pthread_create(&philosopher_thread[i], 0, philosopher, (void*)i);
    }
 
    pause();
